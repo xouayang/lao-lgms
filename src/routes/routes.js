@@ -12,7 +12,10 @@ const department = require('./department.routes');
 const addressRoute = require('./address.routes');
 const sectorRoute = require('./sector.routes');
 const userRoute = require('./user.routes');
-const rarul_departments = require('./rarul_department.routes');
+const rarul_departments = require('./province_department.routes');
+const district = require('./district.routes');
+const office = require('./office.model.routes');
+const unit = require('./unit.routes');
 
 //use file
 departmentOrganizationRoute(router);
@@ -26,6 +29,9 @@ department(router);
 userRoute(router);
 rarul_departments(router);
 departmentOrganizationMemberRoute(router);
+district(router);
+office(router);
+unit(router);
 
 // export router
 module.exports = router;

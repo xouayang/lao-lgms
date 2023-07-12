@@ -1,4 +1,4 @@
-const controller = require('../controllers/rarul_departments.controller');
+const controller = require('../controllers/province_departments.controller');
 const verifyToken = require('../middleware/token')
 module.exports = async (app) => {
     app.post('/rarul_department', verifyToken,controller.create);

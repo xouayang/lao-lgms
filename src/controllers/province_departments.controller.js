@@ -1,4 +1,4 @@
-const Rarul = require("../models/rarul.model");
+const Rarul = require("../models/province_department.model");
 const sequelize = require("../configs/db");
 const { QueryTypes } = require("sequelize");
 // create Rarul
@@ -30,7 +30,7 @@ exports.get_all_by_id = async (req, res) => {
     const { id } = req.params;
     const sql = `
          select pr.id as province_id,rd.id as rarul_departments,rd.title,rd.created_at from provinces pr 
-         inner join rarul_departments rd on pr.id = rd.province_id
+         inner join province_departments rd on pr.id = rd.province_id
          where pr.id = '${id}'
         `;
     const data = await sequelize.query(sql, { type: QueryTypes.SELECT });
