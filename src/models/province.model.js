@@ -13,8 +13,15 @@ const Province = sequelize.define(
       type: DataTypes.UUID,
       allowNull: false,
     },
-
     province_title: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    user_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    password: {
       type: DataTypes.STRING,
       allowNull: false,
     },
@@ -22,10 +29,14 @@ const Province = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
-    created_at : {
-        type:DataTypes.DATE,
-        defaultValue:sequelize.literal("NOW()")
-    }
+    role: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      defaultValue: sequelize.literal("NOW()"),
+    },
   },
   {
     sequelize,

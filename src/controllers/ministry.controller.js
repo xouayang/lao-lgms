@@ -1,27 +1,28 @@
 const Ministry = require("../models/ministry.models");
+const Province = require('../models/province.model')
 const sequelize = require("../configs/db");
 const { QueryTypes } = require("sequelize");
-const bcryt = require('bcrypt');
-const jwt = require('jsonwebtoken');
+const bcryt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 exports.create = async (req, res) => {
   const user = req.payload.id;
   try {
-    const { ministry_title, profile,user_name,password,role } = req.body;
-    if(!ministry_title || !profile || !user_name || !password || !role) {
-      return res.status(400).json({message:"The body is not empty"})
+    const { ministry_title, profile, user_name, password, role } = req.body;
+    if (!ministry_title || !profile || !user_name || !password || !role) {
+      return res.status(400).json({ message: "The body is not empty" });
     }
-    const hashPassword = await bcryt.hash(password,10)
+    const hashPassword = await bcryt.hash(password, 10);
     const data = {
-      ministry_title:ministry_title,
-      profile:profile,
-      user_name:user_name,
-      password:hashPassword,
-      role:role,
-      user_id:user
-    }
+      ministry_title: ministry_title,
+      profile: profile,
+      user_name: user_name,
+      password: hashPassword,
+      role: role,
+      user_id: user,
+    };
     await Ministry.create(data)
       .then((success) => {
-        console.log(data)
+        console.log(data);
         return res.status(200).json(success);
       })
       .catch(() => {
@@ -31,43 +32,66 @@ exports.create = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-// login 
+// login
 exports.signIn = async (req, res) => {
   try {
-    const {user_name,password} = req.body;
-    const data_ministry = await Ministry.findOne({where:{user_name:user_name}})
-    if(!data_ministry) {
-      return res.status(404).json({message:"not found user"})
+    const { user_name, password } = req.body;
+    const data_ministry = await Ministry.findOne({
+      where: { user_name: user_name },
+    });
+    const data_province = await Province.findOne({where:{user_name:user_name}})
+    if (data_ministry) {
+      const checkPassword = await bcryt.compare(
+        password,
+        data_ministry.password
+      );
+      if (!checkPassword) {
+        return res.status(404).json({ message: "password invialid" });
+      }
+      const m_data = {
+        id: data_ministry.id,
+        user_name: data_ministry.user_name,
+        profile: data_ministry.profile,
+        role: data_ministry.role,
+      };
+      const token = jwt.sign(m_data, process.env.SECRET_KEY, {
+        expiresIn: "120d",
+      });
+      res.status(200).json({ token: token });
+    } else {
+     const checkPassword = await bcryt.compare(password,data_province.password)
+     if(!checkPassword) {
+      return res.status(400).json({message:"not found user"})
+     } else {
+      const p_data= {
+        id:data_province.id,
+        user_name:data_province.user_name,
+        profile:data_province.profile,
+        role:data_province.role
+      }
+      const token = jwt.sign(p_data,process.env.SECRET_KEY,{expiresIn:"120d"})
+      res.status(200).json({province_token:token})
+     }
     }
-    const checkPassword = await bcryt.compare(password,data_ministry.password)
-    if(!checkPassword) {
-      return res.status(404).json({message:"password invialid"})
-    }
-    const m_data = {
-      id:data_ministry.id,
-      user_name:data_ministry.user_name,
-      profile:data_ministry.profile,
-      role:data_ministry.role
-    }
-    const token = jwt.sign(m_data, process.env.SECRET_KEY, { expiresIn: "120d" });
-    res.status(200).json({token:token})
   } catch (error) {
-   return res.status(500).json({message:error.message}) 
+    return res.status(500).json({ message: error.message });
   }
-}
+};
 
 exports.selectAll = async (req, res) => {
   try {
-    const id = req.payload.id
-     await Ministry.findAll({where:{id:id}}).then((data) => {
-      if(data.length > 0 ){
-        return res.status(200).json(data)
-      }
-     }).catch((error) => {
-      return res.status(400).json({message:error.message})
-     })
+    const id = req.payload.id;
+    await Ministry.findAll({ where: { id: id } })
+      .then((data) => {
+        if (data.length > 0) {
+          return res.status(200).json(data);
+        }
+      })
+      .catch((error) => {
+        return res.status(400).json({ message: error.message });
+      });
     // const sql = `
-    //   select mt.ministry_title,mt.profile,us.name,mt.created_at from users us 
+    //   select mt.ministry_title,mt.profile,us.name,mt.created_at from users us
     //   inner join ministries mt on us.id = mt.user_id
     // `;
     // const data = await sequelize.query(sql, { type: QueryTypes.SELECT });

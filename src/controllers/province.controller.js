@@ -1,13 +1,16 @@
 const Province = require("../models/province.model");
-
+const bcrypt = require('bcrypt')
 exports.create = async (req, res) => {
   const user = req.payload;
   try {
-    const { province_title, profile } = req.body;
-
+    const {profile,user_name,password,role, province_title } = req.body;
+    const hashPassword = await bcrypt.hash(password,10)
     await Province.create({
       province_title,
       profile,
+      user_name,
+      password:hashPassword,
+      role,
       user_id: user.id,
     })
       .then((data) => {
